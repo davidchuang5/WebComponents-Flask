@@ -1,10 +1,40 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css } from 'lit';
 
 export class deleteBook extends LitElement {
   static get properties() {
     return {
       books: { type: Array },
     };
+  }
+
+  static get styles() {
+    return css`
+      form {
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+        width: 200px;
+      }
+
+      input,
+      button {
+        margin-bottom: 1rem;
+        margin-right: 1rem;
+        margin-left: 1rem;
+        padding: 0.5rem;
+        font-size: 12px;
+      }
+
+      button {
+        background-color: brown;
+        color: white;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: darkbrown;
+      }
+    `;
   }
 
   constructor() {
@@ -36,7 +66,9 @@ export class deleteBook extends LitElement {
       const data = await response.json();
       console.log('data', data);
       this.dispatchEvent(new CustomEvent('delete-book', { detail: data }));
-    } catch (error) {}
+    } catch (error) {
+      console.error('Could not delete', error);
+    }
   };
 
   render() {

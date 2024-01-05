@@ -1,6 +1,8 @@
-import { LitElement, html } from 'lit';
+import { LitElement, html, css } from 'lit';
 import { AddBook } from './addBook.js';
 import { deleteBook } from './deleteBook.js';
+import { editBook } from './editBook.js';
+import { produce } from 'immer';
 
 export class GetData extends LitElement {
   static get properties() {
@@ -9,6 +11,31 @@ export class GetData extends LitElement {
       books: { type: Array },
       authors: { type: Array },
     };
+  }
+  static get styles() {
+    return css`
+      :host {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+        background-color: #f0f0f0;
+        border-radius: 1rem;
+      }
+
+      h1 {
+        margin-bottom: 2rem;
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 1rem;
+      }
+    `;
   }
 
   constructor() {
@@ -21,31 +48,44 @@ export class GetData extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     document.getElementById('add-book').addEventListener('data-changes', handleBookAdded);
-    document.getElementById('delete-book').addEventListener('delete-book', handleBookDeleted);
+    document.getElementById('delete-book').addEventListener('delete-book', handleNewList);
+    document.getElementById('edit-book').addEventListener('edit-book', handleNewList);
+    // this.addEventListener give the component access
+    // Window.addEventListener gives global access
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.getElementById('add-book').removeEventListener('data-changes', this.handleBookAdded);
-    document.getElementById('delete-book').removeEventListener('delete-book', handleBookDeleted);
+    document.getElementById('add-book').removeEventListener('data-changes', handleBookAdded);
+    document.getElementById('delete-book').removeEventListener('delete-book', handleNewList);
+    document.getElementById('edit-book').removeEventListener('edit-book', handleNewList);
   }
 
   handleBookAdded(e) {
     const data = e.detail;
     const lastBook = data[data.length - 1];
     console.log('detail', data);
-    this.books = [...this.books, html`<li>${lastBook}</li>`];
-    //this.dispatchEvent(new CustomEvent('data-changes', { detail: this.data }));
-    this.requestUpdate();
+    //this.books = [...this.books, html`<li>${lastBook}</li>`]; //Without Immer we need to use a shallow copy
+    this.books = produce(this.books, (draft) => {
+      draft.push(lastBook);
+    });
+    // this.requestUpdate(); This is not needed because changing properties triggers Lit to rerender
   }
 
-  handleBookDeleted(e) {
-    const data = e.detail;
-    console.log('detail', data);
-    this.books = data.map((bookName) => {
-      return html`<li>${bookName}</li>`;
-    });
-  }
+  // handleNewList(e) {
+  //   const data = e.detail;
+  //   console.log('detail', data);
+
+  //   this.books = produce(this.books, (draft) => {
+  //     draft.length = 0; // Emptying the previous array
+  //     data.forEach((book) => {
+  //       draft.push(html`<li>${book}</li>`);
+  //     });
+  //   });
+  //   // this.books = data.map((bookName) => {
+  //   //   return html`<li>${bookName}</li>`;
+  //   // });
+  // }
 
   async connectedCallback() {
     super.connectedCallback();
@@ -69,16 +109,23 @@ export class GetData extends LitElement {
     }
   }
 
+  renderBooks() {
+    this.books.map((book) => {
+      html`<li>${book}</li>`;
+    });
+  }
+
   render() {
     return html`
       <div>
         <h1>Books</h1>
         <ul>
-          ${this.books}
+          ${this.renderBooks()}
         </ul>
       </div>
       <add-book id="add-book" @data-changes=${this.handleBookAdded}></add-book>
-      <delete-book id="delete-book" @delete-book=${this.handleBookDeleted}></delete-book>
+      <delete-book id="delete-book" @delete-book=${this.handleNewList}></delete-book>
+      <edit-book id="edit-book" @edit-book=${this.handleNewList}></edit-book>
     `;
   }
 }

@@ -1,6 +1,9 @@
 import { LitElement, html } from 'lit';
 import { GetData } from './getData.js';
-// import { AddBook } from './addBook.js';
+import { NavBar } from './navBar.js';
+import { enableMapSet } from 'immer';
+
+enableMapSet();
 
 export class TopLevel extends LitElement {
   static get properties() {
@@ -27,14 +30,10 @@ export class TopLevel extends LitElement {
   handleDataChange(e) {
     this.data = e.detail;
   }
-  // handleDataChange(e) {
-  //   this.data = produce(this.data, (draft) => {
-  //     draft = e.detail.data;
-  //   });
-  // }
 
   render() {
     return html`<div>
+      <nav-bar></nav-bar>
       <get-data @data-changes=${this.handleDataChange}></get-data>
     </div>`;
   }
