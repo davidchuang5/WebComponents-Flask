@@ -46,20 +46,34 @@ export class GetData extends LitElement {
     this.isLoading = false;
   }
 
+  // connectedCallback() {
+  //   super.connectedCallback();
+  //   document.getElementById('add-book').addEventListener('data-changes', handleBookAdded);
+  //   document.getElementById('delete-book').addEventListener('delete-book', handleNewList);
+  //   document.getElementById('edit-book').addEventListener('edit-book', handleNewList);
+
+  // }
+  // disconnectedCallback() {
+  //   super.disconnectedCallback();
+  //   document.getElementById('add-book').removeEventListener('data-changes', handleBookAdded);
+  //   document.getElementById('delete-book').removeEventListener('delete-book', handleNewList);
+  //   document.getElementById('edit-book').removeEventListener('edit-book', handleNewList);
+  // }
+
+  // this.addEventListener give the component access
+  // Window.addEventListener gives global access
   connectedCallback() {
     super.connectedCallback();
-    document.getElementById('add-book').addEventListener('data-changes', handleBookAdded);
-    document.getElementById('delete-book').addEventListener('delete-book', handleNewList);
-    document.getElementById('edit-book').addEventListener('edit-book', handleNewList);
-    // this.addEventListener give the component access
-    // Window.addEventListener gives global access
+    this.addEventListener('data-changes', this.handleBookAdded.bind(this));
+    this.addEventListener('delete-book', this.handleNewList.bind(this));
+    this.addEventListener('edit-book', this.handleNewList.bind(this));
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    document.getElementById('add-book').removeEventListener('data-changes', handleBookAdded);
-    document.getElementById('delete-book').removeEventListener('delete-book', handleNewList);
-    document.getElementById('edit-book').removeEventListener('edit-book', handleNewList);
+    this.removeEventListener('data-changes', this.handleBookAdded);
+    this.removeEventListener('delete-book', this.handleNewList);
+    this.removeEventListener('edit-book', this.handleNewList);
   }
 
   handleBookAdded(e) {
