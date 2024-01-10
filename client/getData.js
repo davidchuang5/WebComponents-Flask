@@ -43,6 +43,7 @@ export class GetData extends LitElement {
     this.data = [];
     this.books = [];
     this.authors = [];
+    this.isLoading = false;
   }
 
   connectedCallback() {
@@ -69,7 +70,6 @@ export class GetData extends LitElement {
     this.books = produce(this.books, (draft) => {
       draft.push(lastBook);
     });
-    // this.requestUpdate(); This is not needed because changing properties triggers Lit to rerender
   }
 
   // handleNewList(e) {
@@ -89,7 +89,7 @@ export class GetData extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
-    // this.addEventListener('rerender', this.handleBookAdded);
+    this.isLoading = true;
     const path = 'http://127.0.0.1:5000/fetchBooks';
     try {
       const response = await fetch(path);
@@ -99,34 +99,44 @@ export class GetData extends LitElement {
       console.log('response', response);
       const data = await response.json();
       console.log('data', data);
-      this.books = data.map((bookName) => {
-        return html`<li>${bookName}</li>`;
+
+      this.books = produce(this.books, (draft) => {
+        for (let i = 0; i < data.length; i++) {
+          draft.push(data[i]);
+        }
       });
-      // this.dispatchEvent(new CustomEvent('data-changes', { detail: this.data }));
+
       console.log('this.books', this.books);
     } catch (error) {
       console.error('Error fetching');
     }
+    this.isLoading = false;
   }
 
   renderBooks() {
-    this.books.map((book) => {
-      html`<li>${book}</li>`;
+    return this.books.map((book) => {
+      return html`<li>${book}</li>`;
     });
   }
 
   render() {
-    return html`
-      <div>
-        <h1>Books</h1>
-        <ul>
-          ${this.renderBooks()}
-        </ul>
-      </div>
-      <add-book id="add-book" @data-changes=${this.handleBookAdded}></add-book>
-      <delete-book id="delete-book" @delete-book=${this.handleNewList}></delete-book>
-      <edit-book id="edit-book" @edit-book=${this.handleNewList}></edit-book>
-    `;
+    if (this.isLoading) {
+      console.log('isLoading');
+      return html`<p>Loading...</p>`;
+    } else {
+      console.log('Loaded');
+      return html`
+        <div>
+          <h1>Books</h1>
+          <ul>
+            ${this.renderBooks()}
+          </ul>
+        </div>
+        <add-book id="add-book" @data-changes=${this.handleBookAdded}></add-book>
+        <delete-book id="delete-book" @delete-book=${this.handleNewList}></delete-book>
+        <edit-book id="edit-book" @edit-book=${this.handleNewList}></edit-book>
+      `;
+    }
   }
 }
 
