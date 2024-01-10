@@ -72,20 +72,17 @@ export class GetData extends LitElement {
     });
   }
 
-  // handleNewList(e) {
-  //   const data = e.detail;
-  //   console.log('detail', data);
+  handleNewList(e) {
+    const data = e.detail;
+    console.log('detail', data);
 
-  //   this.books = produce(this.books, (draft) => {
-  //     draft.length = 0; // Emptying the previous array
-  //     data.forEach((book) => {
-  //       draft.push(html`<li>${book}</li>`);
-  //     });
-  //   });
-  //   // this.books = data.map((bookName) => {
-  //   //   return html`<li>${bookName}</li>`;
-  //   // });
-  // }
+    this.books = produce(this.books, (draft) => {
+      draft.length = 0; // Emptying the previous array
+      data.forEach((book) => {
+        draft.push(book);
+      });
+    });
+  }
 
   async connectedCallback() {
     super.connectedCallback();
